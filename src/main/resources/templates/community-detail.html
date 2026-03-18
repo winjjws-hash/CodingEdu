@@ -29,12 +29,28 @@
         
         .detail-content { line-height: 1.8; font-size: 1.05rem; color: #333; min-height: 300px; white-space: pre-wrap; }
         
-        .btn-back-group { margin-top: 40px; display: flex; justify-content: center; }
+        .btn-back-group { margin-top: 40px; display: flex; justify-content: space-between; align-items: center; }
         .btn-back {
             background: var(--blue-light); color: var(--blue); padding: 12px 30px; border-radius: 50px;
             font-weight: 800; text-decoration: none; transition: all .2s; border: none; cursor: pointer;
         }
         .btn-back:hover { background: var(--blue); color: var(--white); }
+        .post-actions { display: flex; gap: 10px; }
+        .btn-edit {
+            background: #f5f5f5; color: #555; padding: 10px 22px; border-radius: 50px;
+            font-weight: 700; text-decoration: none; transition: all .2s; border: 2px solid #ddd; font-size: .9rem;
+        }
+        .btn-edit:hover { background: #e8e8e8; border-color: #bbb; }
+        .btn-delete {
+            background: #FFF0F0; color: #c0392b; padding: 10px 22px; border-radius: 50px;
+            font-weight: 700; border: 2px solid #f5c6c6; cursor: pointer; font-size: .9rem; transition: all .2s;
+        }
+        .btn-delete:hover { background: #c0392b; color: white; border-color: #c0392b; }
+        .btn-comment-delete {
+            background: none; border: none; color: #aaa; font-size: .8rem; cursor: pointer;
+            padding: 4px 8px; border-radius: 6px; transition: all .2s;
+        }
+        .btn-comment-delete:hover { color: #c0392b; background: #FFF0F0; }
     </style>
 </head>
 <body style="background: var(--gray);">
@@ -73,9 +89,17 @@
         <!-- 댓글 목록 -->
         <div class="comment-list" style="margin-bottom: 30px;">
             <div th:each="comment : ${comments}" style="background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #f0f0f0;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="font-weight: 800; color: #444;" th:text="${comment.author.nickname}">작성자</span>
-                    <span style="font-size: .85rem; color: #888;" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-weight: 800; color: #444;" th:text="${comment.author.nickname}">작성자</span>
+                        <span style="font-size: .85rem; color: #888;" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                    </div>
+                    <form th:if="${currentUsername != null and currentUsername == comment.author.username}"
+                          th:action="@{/community/{postId}/comment/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
+                          method="POST" style="margin: 0;"
+                          onsubmit="return confirm('댓글을 삭제할까요?');">
+                        <button type="submit" class="btn-comment-delete">삭제</button>
+                    </form>
                 </div>
                 <div style="color: #333; line-height: 1.5; white-space: pre-wrap; font-size: 0.95rem;" th:text="${comment.content}">댓글 내용</div>
             </div>
@@ -105,6 +129,13 @@
 
     <div class="btn-back-group">
         <a href="/community" class="btn-back">목록으로 돌아가기</a>
+        <div class="post-actions" th:if="${currentUsername != null and currentUsername == post.author.username}">
+            <a th:href="@{/community/{id}/edit(id=${post.id})}" class="btn-edit">수정</a>
+            <form th:action="@{/community/{id}/delete(id=${post.id})}" method="POST" style="margin:0;"
+                  onsubmit="return confirm('게시글을 삭제할까요?');">
+                <button type="submit" class="btn-delete">삭제</button>
+            </form>
+        </div>
     </div>
 </div>
 

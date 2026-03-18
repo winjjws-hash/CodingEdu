@@ -37,4 +37,16 @@ public class CommentService {
 
         return comment;
     }
+
+    @Transactional
+    public void deleteComment(Long commentId, String username) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        if (!comment.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+        Post post = comment.getPost();
+        commentRepository.delete(comment);
+        postService.decrementCommentCount(post);
+    }
 }
