@@ -33,11 +33,21 @@ public class CommentController {
         if (userDetails == null) {
             return "redirect:/login";
         }
-
         Post post = postService.getPostById(postId);
         User author = userService.findByUsername(userDetails.getUsername());
         commentService.addComment(content, post, author);
+        return "redirect:/community/" + postId;
+    }
 
+    // 댓글 삭제
+    @PostMapping("/community/{postId}/comment/{commentId}/delete")
+    public String deleteComment(@PathVariable(name = "postId") Long postId,
+                                @PathVariable(name = "commentId") Long commentId,
+                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+        commentService.deleteComment(commentId, userDetails.getUsername());
         return "redirect:/community/" + postId;
     }
 }

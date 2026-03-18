@@ -3,14 +3,17 @@ package com.codingedu.service;
 import com.codingedu.entity.Post;
 import com.codingedu.entity.User;
 import com.codingedu.repository.PostRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class PostService {
+
+    private static final int PAGE_SIZE = 10;
 
     private final PostRepository postRepository;
 
@@ -18,11 +21,12 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
-    public List<Post> getPostsByCategory(String category) {
+    public Page<Post> getPostsByCategory(String category, int page) {
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         if ("all".equals(category)) {
-            return postRepository.findAllByOrderByCreatedAtDesc();
+            return postRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
-        return postRepository.findByCategoryOrderByCreatedAtDesc(category);
+        return postRepository.findByCategoryOrderByCreatedAtDesc(category, pageable);
     }
 
     public Post getPostById(Long id) {
@@ -48,8 +52,35 @@ public class PostService {
     }
 
     @Transactional
+    public void updatePost(Long id, String category, String title, String content, String username) {
+        Post post = getPostById(id);
+        if (!post.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("수정 권한이 없습니다.");
+        }
+        post.setCategory(category);
+        post.setTitle(title);
+        post.setContent(content);
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void deletePost(Long id, String username) {
+        Post post = getPostById(id);
+        if (!post.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+        postRepository.delete(post);
+    }
+
+    @Transactional
     public void incrementCommentCount(Post post) {
         post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void decrementCommentCount(Post post) {
+        post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
         postRepository.save(post);
     }
 }
