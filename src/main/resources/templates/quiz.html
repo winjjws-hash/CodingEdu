@@ -61,7 +61,23 @@
 </header>
 
 <!-- QUIZ SECTION -->
-<section style="background: var(--gray);">
+<section style="background: var(--white);">
+    <!-- 연습 퀴즈 배너 -->
+    <div style="background: linear-gradient(135deg, var(--blue-light), #BBDEFB); border-radius: 20px;
+                padding: 28px 36px; display:flex; justify-content:space-between; align-items:center;
+                margin-bottom: 40px; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="font-size:1.2rem; font-weight:900; color:var(--blue); margin-bottom:6px;">⚡ 빠른 연습 퀴즈</div>
+            <div style="font-size:.95rem; color:var(--text-sub);">난이도·주제를 직접 골라 즉석에서 풀어보는 연습 모드</div>
+        </div>
+        <a href="/quiz/practice"
+           style="background:var(--blue); color:white; padding:12px 28px; border-radius:50px;
+                  font-weight:800; text-decoration:none; font-size:.95rem; white-space:nowrap;
+                  transition: background .2s;"
+           onmouseover="this.style.background='var(--blue-mid)'"
+           onmouseout="this.style.background='var(--blue)'">연습하러 가기 →</a>
+    </div>
+
     <!-- 난이도 필터 탭 -->
     <div class="quiz-filter-tabs">
         <a th:href="@{/quiz(difficulty='all')}" class="filter-tab" th:classappend="${currentDifficulty == 'all'} ? 'active'">전체</a>
@@ -71,7 +87,7 @@
     </div>
 
     <div class="quiz-grid">
-        <div th:if="${quizzes.isEmpty()}" style="grid-column: 1/-1; text-align:center; padding:60px; color:#888; background:var(--white); border-radius:20px;">
+        <div th:if="${quizzes.isEmpty()}" style="grid-column: 1/-1; text-align:center; padding:60px; color:#888; background:var(--gray); border-radius:20px;">
             등록된 퀴즈가 없습니다.
         </div>
 
