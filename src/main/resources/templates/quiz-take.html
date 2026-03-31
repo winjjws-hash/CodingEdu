@@ -6,26 +6,27 @@
     <title th:text="${quiz.title} + ' - CodeEdu'">퀴즈</title>
     <link rel="stylesheet" href="/css/common.css">
     <style>
-        .quiz-take-wrap { max-width: 800px; margin: 40px auto 80px; }
+        .quiz-take-wrap { max-width: 700px; margin: 40px auto 80px; padding: 0 16px; }
 
         .quiz-info-bar {
-            background: var(--white); border-radius: 20px; padding: 24px 32px;
+            background: var(--white); border-radius: 20px; padding: 20px 28px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #eee; margin-bottom: 16px;
         }
-        .quiz-info-title { font-size: 1.4rem; font-weight: 900; color: var(--text); }
-        .quiz-topic { font-size: .9rem; color: #888; font-weight: 700; margin-bottom: 4px; }
-        .quiz-timer { font-size: 1.1rem; font-weight: 900; color: var(--blue); background: var(--blue-light); padding: 8px 18px; border-radius: 50px; }
+        .quiz-info-title { font-size: 1.2rem; font-weight: 900; color: var(--text); }
+        .quiz-topic { font-size: .85rem; color: #888; font-weight: 700; margin-bottom: 4px; }
+        .quiz-timer { font-size: 1rem; font-weight: 900; color: var(--blue); background: var(--blue-light); padding: 7px 16px; border-radius: 50px; }
 
-        .progress-bar { height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 6px; }
-        .progress-fill { height: 100%; background: var(--blue); border-radius: 10px; transition: width .3s; width: 0%; }
-        .progress-label { text-align: right; font-size: .8rem; color: #888; margin-bottom: 28px; }
+        .progress-wrap { margin-bottom: 6px; }
+        .progress-bar { height: 8px; background: #eee; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--blue); border-radius: 10px; transition: width .4s; }
+        .progress-label { display: flex; justify-content: space-between; font-size: .8rem; color: #888; margin-top: 6px; margin-bottom: 24px; }
 
-        .q-card {
-            background: var(--white); border-radius: 20px; padding: 32px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #eee; margin-bottom: 20px;
-        }
-        .q-num { font-size: .85rem; font-weight: 800; color: var(--blue); margin-bottom: 10px; }
+        /* 문제 카드 - 기본 숨김 */
+        .q-card { display: none; background: var(--white); border-radius: 20px; padding: 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .q-card.active { display: block; }
+
+        .q-num { font-size: .85rem; font-weight: 800; color: var(--blue); margin-bottom: 12px; }
         .q-text { font-size: 1.1rem; font-weight: 800; color: var(--text); line-height: 1.6; margin-bottom: 24px; }
 
         .choices { display: flex; flex-direction: column; gap: 12px; }
@@ -40,23 +41,41 @@
         .choice-marker {
             width: 32px; height: 32px; border-radius: 50%; border: 2px solid #ddd;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: .85rem; flex-shrink: 0; background: white;
-            transition: all .2s;
+            font-weight: 900; font-size: .85rem; flex-shrink: 0; background: white; transition: all .2s;
         }
         .choice-label:has(input:checked) .choice-marker { background: var(--blue); border-color: var(--blue); color: white; }
         .choice-text { font-size: 1rem; color: #333; font-weight: 600; }
 
-        .submit-section {
-            background: var(--white); border-radius: 20px; padding: 32px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid #eee; text-align: center;
+        /* 미선택 경고 */
+        .no-answer-msg {
+            display: none; color: #C62828; font-size: .85rem; font-weight: 700;
+            margin-top: 14px; padding: 10px 16px; background: #FFEBEE;
+            border-radius: 8px; border-left: 4px solid #C62828;
         }
-        .submit-warning { font-size: .9rem; color: #888; margin-bottom: 20px; }
+
+        /* 네비게이션 버튼 */
+        .nav-btns {
+            display: flex; gap: 12px; margin-top: 24px; justify-content: space-between;
+        }
+        .btn-prev {
+            padding: 14px 28px; border-radius: 50px; border: 2px solid #eaeaea;
+            background: var(--white); color: var(--text-sub); font-size: 1rem; font-weight: 800;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-prev:hover { border-color: var(--blue); color: var(--blue); }
+        .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-next {
+            flex: 1; padding: 14px; border-radius: 50px; border: none;
+            background: var(--blue); color: white; font-size: 1rem; font-weight: 800;
+            cursor: pointer; transition: all .2s;
+        }
+        .btn-next:hover { background: var(--blue-mid); transform: translateY(-2px); }
         .btn-submit-quiz {
-            background: var(--blue); color: white; border: none; padding: 16px 60px;
-            border-radius: 50px; font-size: 1.1rem; font-weight: 900; cursor: pointer;
-            transition: all .2s; box-shadow: 0 4px 16px rgba(21,101,192,0.3);
+            flex: 1; padding: 14px; border-radius: 50px; border: none;
+            background: #2E7D32; color: white; font-size: 1rem; font-weight: 800;
+            cursor: pointer; transition: all .2s; box-shadow: 0 4px 14px rgba(46,125,50,0.3);
         }
-        .btn-submit-quiz:hover { background: var(--blue-mid); transform: translateY(-3px); }
+        .btn-submit-quiz:hover { background: #1B5E20; transform: translateY(-2px); }
     </style>
 </head>
 <body style="background: var(--gray);">
@@ -78,14 +97,22 @@
     </div>
 
     <!-- 진행률 -->
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-    <div class="progress-label">
-        <span id="answered-count">0</span> / <span th:text="${quiz.questionCount}">5</span> 답변 완료
+    <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label">
+            <span id="progress-text">1번째 문제</span>
+            <span><span id="current-num">1</span> / <span th:text="${quiz.questionCount}">5</span></span>
+        </div>
     </div>
 
-    <!-- 퀴즈 폼 -->
-    <form th:action="@{/quiz/{id}/submit(id=${quiz.id})}" method="POST">
-        <div th:each="question, stat : ${quiz.questions}" class="q-card">
+    <!-- 퀴즈 폼 (모든 문제 포함, JS로 한 번에 하나씩 노출) -->
+    <form id="quiz-form" th:action="@{/quiz/{id}/submit(id=${quiz.id})}" method="POST">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div th:each="question, stat : ${quiz.questions}"
+             class="q-card"
+             th:classappend="${stat.first} ? 'active'"
+             th:attr="data-index=${stat.index}">
             <div class="q-num" th:text="'Q' + ${stat.count} + ' / ' + ${quiz.questionCount}">Q1 / 5</div>
             <div class="q-text" th:text="${question.questionText}">문제 내용</div>
             <div class="choices">
@@ -93,19 +120,21 @@
                     <input type="radio"
                            th:name="'answer_' + ${question.id}"
                            th:value="${choice.id}"
-                           class="q-radio" required>
+                           class="q-radio">
                     <div class="choice-marker"
                          th:text="${ci.index == 0 ? 'A' : ci.index == 1 ? 'B' : ci.index == 2 ? 'C' : 'D'}">A</div>
                     <span class="choice-text" th:text="${choice.choiceText}">선택지</span>
                 </label>
             </div>
+            <div class="no-answer-msg" id="no-answer-msg">⚠️ 답을 선택해주세요!</div>
         </div>
 
-        <!-- 제출 -->
-        <div class="submit-section">
-            <div class="submit-warning">⚠️ 모든 문제에 답변 후 제출하세요. 제출 후에는 수정할 수 없습니다.</div>
-            <button type="submit" class="btn-submit-quiz"
-                    onclick="return confirm('퀴즈를 제출하시겠습니까?')">✅ 퀴즈 제출하기</button>
+        <!-- 네비게이션 -->
+        <div class="nav-btns">
+            <button type="button" class="btn-prev" id="btn-prev" onclick="prevQuestion()" disabled>← 이전</button>
+            <button type="button" class="btn-next" id="btn-next" onclick="nextQuestion()">다음 문제 →</button>
+            <button type="submit" class="btn-submit-quiz" id="btn-submit" style="display:none;"
+                    onclick="return confirm('퀴즈를 제출하시겠습니까?')">✅ 제출하기</button>
         </div>
     </form>
 </div>
@@ -114,6 +143,53 @@
 <footer th:replace="~{index :: footer}"></footer>
 
 <script>
+    const cards = document.querySelectorAll('.q-card');
+    const total = cards.length;
+    let current = 0;
+
+    function showQuestion(idx) {
+        cards.forEach(c => c.classList.remove('active'));
+        cards[idx].classList.add('active');
+
+        // 미선택 경고 숨김
+        document.getElementById('no-answer-msg').style.display = 'none';
+
+        // 이전 버튼
+        document.getElementById('btn-prev').disabled = (idx === 0);
+
+        // 마지막 문제면 제출 버튼, 아니면 다음 버튼
+        const isLast = (idx === total - 1);
+        document.getElementById('btn-next').style.display   = isLast ? 'none'  : 'block';
+        document.getElementById('btn-submit').style.display = isLast ? 'block' : 'none';
+
+        // 진행률 업데이트
+        const pct = ((idx + 1) / total) * 100;
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('current-num').textContent = idx + 1;
+        document.getElementById('progress-text').textContent = `${idx + 1}번째 문제`;
+
+        current = idx;
+    }
+
+    function isCurrentAnswered() {
+        const card = cards[current];
+        const radios = card.querySelectorAll('input[type="radio"]');
+        const name = radios[0]?.name;
+        return name ? !!document.querySelector(`input[name="${name}"]:checked`) : false;
+    }
+
+    function nextQuestion() {
+        if (!isCurrentAnswered()) {
+            document.getElementById('no-answer-msg').style.display = 'block';
+            return;
+        }
+        if (current < total - 1) showQuestion(current + 1);
+    }
+
+    function prevQuestion() {
+        if (current > 0) showQuestion(current - 1);
+    }
+
     // 타이머
     const timerEl = document.getElementById('timer-display');
     let remaining = parseInt(timerEl.dataset.seconds, 10);
@@ -121,6 +197,7 @@
         const m = String(Math.floor(remaining / 60)).padStart(2, '0');
         const s = String(remaining % 60).padStart(2, '0');
         timerEl.textContent = m + ':' + s;
+        if (remaining <= 60) timerEl.style.color = '#C62828';
     }
     updateTimer();
     const iv = setInterval(() => {
@@ -128,18 +205,6 @@
         remaining--;
         updateTimer();
     }, 1000);
-
-    // 진행률
-    const radios = document.querySelectorAll('.q-radio');
-    const answeredEl = document.getElementById('answered-count');
-    const fillEl = document.getElementById('progress-fill');
-    function updateProgress() {
-        const names = new Set([...radios].map(r => r.name));
-        const done = [...names].filter(n => document.querySelector(`input[name="${n}"]:checked`)).length;
-        answeredEl.textContent = done;
-        fillEl.style.width = (names.size ? done / names.size * 100 : 0) + '%';
-    }
-    radios.forEach(r => r.addEventListener('change', updateProgress));
 </script>
 </body>
 </html>
