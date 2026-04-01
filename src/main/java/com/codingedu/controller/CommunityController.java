@@ -119,4 +119,29 @@ public class CommunityController {
         postService.deletePost(id, userDetails.getUsername());
         return "redirect:/community";
     }
+
+    // 8. 댓글 등록
+    @PostMapping("/{id}/comment")
+    public String addComment(@PathVariable(name = "id") Long id,
+                             @RequestParam(name = "content") String content,
+                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+        User user = userService.findByUsername(userDetails.getUsername());
+        commentService.addComment(content, postService.getPostById(id), user);
+        return "redirect:/community/" + id;
+    }
+
+    // 9. 댓글 삭제
+    @PostMapping("/{postId}/comment/{commentId}/delete")
+    public String deleteComment(@PathVariable(name = "postId") Long postId,
+                                @PathVariable(name = "commentId") Long commentId,
+                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+        commentService.deleteComment(commentId, userDetails.getUsername());
+        return "redirect:/community/" + postId;
+    }
 }

@@ -315,10 +315,36 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-text">
-    <div class="hero-badge">🎉 코딩은 즐거워요!</div>
-    <h1>코딩이<br>처음인가요?</h1>
-    <h2>쉽고 재미있게 프로그래밍을<br>배워보세요!</h2>
-    <button class="btn-start" onclick="alert('학습을 시작합니다!')">시작하기 ▶</button>
+    <!-- 비로그인 -->
+    <th:block sec:authorize="isAnonymous()">
+      <div class="hero-badge">🎉 코딩은 즐거워요!</div>
+      <h1>코딩이<br>처음인가요?</h1>
+      <h2>쉽고 재미있게 프로그래밍을<br>배워보세요!</h2>
+      <a href="/learn" class="btn-start">시작하기 ▶</a>
+    </th:block>
+    <!-- 로그인 -->
+    <th:block sec:authorize="isAuthenticated()">
+      <div class="hero-badge">👋 다시 오셨네요!</div>
+      <h1 th:text="${dashUser != null ? dashUser.nickname + '님,' : '안녕하세요,'}">안녕하세요,</h1>
+      <h2>오늘도 한 걸음 더 성장해볼까요?</h2>
+      <!-- 미니 대시보드 -->
+      <div style="display:flex; gap:16px; margin:20px 0; flex-wrap:wrap;">
+        <a href="/learn" style="flex:1; min-width:130px; background:rgba(255,255,255,0.9); border-radius:16px; padding:16px 20px; text-decoration:none; color:var(--text); border:2px solid var(--blue-light);">
+          <div style="font-size:1.4rem; font-weight:900; color:var(--blue);"
+               th:text="${totalLessons > 0 ? completedLessons + '/' + totalLessons : '0'}">0/0</div>
+          <div style="font-size:.78rem; color:#888; margin-top:2px;">📚 강의 완료</div>
+        </a>
+        <a href="/quiz" style="flex:1; min-width:130px; background:rgba(255,255,255,0.9); border-radius:16px; padding:16px 20px; text-decoration:none; color:var(--text); border:2px solid var(--blue-light);">
+          <div style="font-size:1.4rem; font-weight:900; color:var(--blue);" th:text="${totalQuizzesTaken}">0</div>
+          <div style="font-size:.78rem; color:#888; margin-top:2px;">🎯 퀴즈 응시</div>
+        </a>
+        <a href="/mypage" style="flex:1; min-width:130px; background:rgba(255,255,255,0.9); border-radius:16px; padding:16px 20px; text-decoration:none; color:var(--text); border:2px solid var(--blue-light);">
+          <div style="font-size:1.4rem; font-weight:900; color:var(--blue);" th:text="${bestGrade != null ? bestGrade + '등급' : '-'}">-</div>
+          <div style="font-size:.78rem; color:#888; margin-top:2px;">🏆 최고 등급</div>
+        </a>
+      </div>
+      <a href="/learn" class="btn-start">학습 이어하기 ▶</a>
+    </th:block>
     <div class="hero-stats">
       <div class="stat">
         <div class="stat-num">12,000+</div>
@@ -483,7 +509,8 @@
 <div class="cta-banner">
   <h2>지금 바로 시작해볼까요? 🚀</h2>
   <p>무료로 가입하고 오늘부터 코딩을 배워보세요. 어렵지 않아요!</p>
-  <button class="btn-cta-big" onclick="alert('회원가입 페이지로 이동합니다!')">🎉 무료로 시작하기</button>
+  <a href="/register" class="btn-cta-big" sec:authorize="isAnonymous()" style="text-decoration:none; display:inline-block;">🎉 무료로 시작하기</a>
+  <a href="/learn" class="btn-cta-big" sec:authorize="isAuthenticated()" style="text-decoration:none; display:inline-block;">📚 학습 이어하기</a>
 </div>
 
 <!-- FOOTER -->

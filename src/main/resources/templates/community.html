@@ -180,7 +180,8 @@
                         <div class="post-meta">
                             <span class="author" th:text="${post.author.nickname}">작성자</span>
                             <span class="date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">작성일짜</span>
-                            <span class="views" th:text="'👁️ 조회 ' + ${post.views}">조회수</span>
+                            <span class="views" th:text="'👁️ ' + ${post.views}">조회수</span>
+                            <span th:text="'💬 ' + ${post.commentCount}">댓글수</span>
                         </div>
                     </div>
                 </a>

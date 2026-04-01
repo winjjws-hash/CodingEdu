@@ -1,10 +1,15 @@
 package com.codingedu.controller;
 
+import com.codingedu.entity.User;
 import com.codingedu.security.CustomUserDetails;
 import com.codingedu.security.CustomUserDetailsService;
+import com.codingedu.service.LessonService;
+import com.codingedu.service.PostService;
+import com.codingedu.service.QuizService;
 import com.codingedu.service.UserService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,15 +22,50 @@ public class HomeController {
 
     private final UserService userService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final LessonService lessonService;
+    private final QuizService quizService;
+    private final PostService postService;
 
-    public HomeController(UserService userService, CustomUserDetailsService customUserDetailsService) {
+    public HomeController(UserService userService,
+                          CustomUserDetailsService customUserDetailsService,
+                          LessonService lessonService,
+                          QuizService quizService,
+                          PostService postService) {
         this.userService = userService;
         this.customUserDetailsService = customUserDetailsService;
+        this.lessonService = lessonService;
+        this.quizService = quizService;
+        this.postService = postService;
     }
 
     @GetMapping("/")
-    public String index() {
-        return "index"; // templates/index.html
+    public String index(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        if (userDetails != null) {
+            User user = userService.findByUsername(userDetails.getUsername());
+            var allCourses = lessonService.getAllCourses();
+            int totalLessons = allCourses.stream().mapToInt(c -> c.getLessonCount()).sum();
+            int completed = lessonService.getTotalCompletedCount(user);
+            var quizResults = quizService.getUserResults(user);
+            int totalQuizzesTaken = quizResults.size();
+            String bestGrade = quizResults.stream()
+                    .map(r -> r.getGrade())
+                    .min((a, b) -> gradeRank(a) - gradeRank(b))
+                    .orElse(null);
+
+            model.addAttribute("dashUser", user);
+            model.addAttribute("totalLessons", totalLessons);
+            model.addAttribute("completedLessons", completed);
+            model.addAttribute("totalQuizzesTaken", totalQuizzesTaken);
+            model.addAttribute("bestGrade", bestGrade);
+            model.addAttribute("recentPosts", postService.getRecentPostsByUser(user));
+        }
+        return "index";
+    }
+
+    private int gradeRank(String grade) {
+        return switch (grade) {
+            case "A" -> 0; case "B" -> 1; case "C" -> 2; case "D" -> 3; default -> 4;
+        };
     }
 
     @GetMapping("/settings")

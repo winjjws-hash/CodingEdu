@@ -98,6 +98,7 @@
                           th:action="@{/community/{postId}/comment/{commentId}/delete(postId=${post.id}, commentId=${comment.id})}"
                           method="POST" style="margin: 0;"
                           onsubmit="return confirm('댓글을 삭제할까요?');">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn-comment-delete">삭제</button>
                     </form>
                 </div>
@@ -112,6 +113,7 @@
         <!-- 댓글 작성 폼 -->
         <div sec:authorize="isAuthenticated()" style="background: var(--white); border: 2px solid #eee; padding: 24px; border-radius: 16px;">
             <form th:action="@{/community/{id}/comment(id=${post.id})}" method="POST">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <textarea name="content" placeholder="궁금한 점이나 응원의 댓글을 남겨주세요!" required
                           style="width: 100%; min-height: 90px; padding: 16px; border: 1px solid #ddd; border-radius: 12px; outline: none; resize: vertical; margin-bottom: 16px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box;"></textarea>
                 <div style="display: flex; justify-content: flex-end;">
