@@ -209,12 +209,14 @@
                 <th:block th:if="${challenge.status == 'active'}">
                     <th:block th:if="${!joined}">
                         <form th:action="@{/challenge/{id}/join(id=${challenge.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn-join">🎯 참여하기</button>
                         </form>
                     </th:block>
                     <th:block th:if="${joined}">
                         <span class="btn-join joined" style="display:block;">✅ 참여중입니다!</span>
                         <form th:action="@{/challenge/{id}/leave(id=${challenge.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn-leave">참여 취소</button>
                         </form>
                     </th:block>

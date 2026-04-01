@@ -101,6 +101,25 @@
                                                       '힘내세요! 😊 아래 해설을 보고 다시 도전해봐요!'}">
             수고했어요!
         </div>
+
+        <!-- 정답/오답/미응답 요약 -->
+        <div style="display:flex; justify-content:center; gap:16px; margin-top:28px; flex-wrap:wrap;"
+             th:with="correctCnt=${questionViews.?[status=='correct'].size()},
+                      wrongCnt=${questionViews.?[status=='wrong'].size()},
+                      unansCnt=${questionViews.?[status=='unanswered'].size()}">
+            <div style="background:#E8F5E9; border-radius:14px; padding:14px 24px; text-align:center; min-width:90px;">
+                <div style="font-size:1.5rem; font-weight:900; color:#2E7D32;" th:text="${correctCnt}">0</div>
+                <div style="font-size:.75rem; color:#555; margin-top:2px;">✅ 정답</div>
+            </div>
+            <div style="background:#FFEBEE; border-radius:14px; padding:14px 24px; text-align:center; min-width:90px;">
+                <div style="font-size:1.5rem; font-weight:900; color:#C62828;" th:text="${wrongCnt}">0</div>
+                <div style="font-size:.75rem; color:#555; margin-top:2px;">❌ 오답</div>
+            </div>
+            <div style="background:#F5F5F5; border-radius:14px; padding:14px 24px; text-align:center; min-width:90px;">
+                <div style="font-size:1.5rem; font-weight:900; color:#757575;" th:text="${unansCnt}">0</div>
+                <div style="font-size:.75rem; color:#555; margin-top:2px;">⬜ 미응답</div>
+            </div>
+        </div>
     </div>
 
     <!-- 문제별 해설 -->
@@ -131,6 +150,7 @@
     <div class="btn-group-result">
         <a th:href="@{/quiz/{id}(id=${quiz.id})}" class="btn-retry">🔄 다시 도전하기</a>
         <a href="/quiz" class="btn-list">퀴즈 목록으로</a>
+        <a href="/mypage" class="btn-list" style="border-color:#888; color:#555;">📊 내 이력 보기</a>
     </div>
 </div>
 

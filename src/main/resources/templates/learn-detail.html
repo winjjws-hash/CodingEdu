@@ -293,6 +293,10 @@
             .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
             .main-content { padding: 32px 24px; }
         }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -929,8 +933,56 @@ async function markComplete(lessonIdx) {
             completedIndices.add(lessonIdx);
             renderTopics();
             renderLesson(lessonIdx);
+
+            const course = COURSES[currentLang];
+            const hasNext = lessonIdx < course.lessons.length - 1;
+            showCompleteToast(hasNext, lessonIdx);
         }
     } catch (e) { console.error(e); }
+}
+
+function showCompleteToast(hasNext, lessonIdx) {
+    const existing = document.getElementById('complete-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'complete-toast';
+    toast.style.cssText = `
+        position:fixed; bottom:32px; left:50%; transform:translateX(-50%);
+        background:#1a1a2e; color:#fff; border-radius:16px;
+        padding:16px 28px; font-weight:700; font-size:.95rem;
+        box-shadow:0 8px 24px rgba(0,0,0,0.3); z-index:9999;
+        display:flex; align-items:center; gap:14px;
+        animation: slideUp .3s ease;
+    `;
+
+    if (hasNext) {
+        toast.innerHTML = `
+            <span>✅ 강의 완료!</span>
+            <button onclick="selectLesson(${lessonIdx + 1}); this.closest('#complete-toast').remove();"
+                style="background:var(--blue); color:#fff; border:none; border-radius:10px;
+                       padding:8px 18px; font-weight:800; cursor:pointer; white-space:nowrap;">
+                다음 강의 →
+            </button>
+            <button onclick="this.closest('#complete-toast').remove();"
+                style="background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:10px;
+                       padding:8px 14px; font-weight:700; cursor:pointer;">✕</button>
+        `;
+    } else {
+        toast.innerHTML = `
+            <span>🎉 이 언어의 모든 강의를 완료했어요!</span>
+            <a href="/learn" style="background:var(--blue); color:#fff; border-radius:10px;
+                       padding:8px 18px; font-weight:800; text-decoration:none; white-space:nowrap;">
+                학습 목록으로
+            </a>
+            <button onclick="this.closest('#complete-toast').remove();"
+                style="background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:10px;
+                       padding:8px 14px; font-weight:700; cursor:pointer;">✕</button>
+        `;
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 6000);
 }
 
 function getCsrfToken() {

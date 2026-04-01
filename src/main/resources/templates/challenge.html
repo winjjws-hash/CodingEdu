@@ -143,6 +143,7 @@
                 </th:block>
                 <th:block th:unless="${joinedIds != null && joinedIds.contains(c.id)}">
                     <form th:action="@{/challenge/{id}/join(id=${c.id})}" method="post" style="margin:0;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn-challenge">참여하기 🎯</button>
                     </form>
                 </th:block>
