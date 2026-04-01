@@ -60,15 +60,27 @@ public class UserService {
     @Transactional
     public boolean updatePassword(String username, String oldPassword, String newPassword) {
         User user = findByUsername(username);
-        
+
         // 이전 비밀번호 검증
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return false;
         }
-        
+
         // 새로운 비밀번호로 업데이트
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return true;
+    }
+
+    public boolean verifyUsernameAndEmail(String username, String email) {
+        return userRepository.findByUsernameAndEmail(username, email).isPresent();
+    }
+
+    @Transactional
+    public void resetPassword(String username, String email, String newPassword) {
+        User user = userRepository.findByUsernameAndEmail(username, email)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

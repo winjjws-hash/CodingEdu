@@ -166,26 +166,23 @@ public class DataInitializer implements CommandLineRunner {
         ));
     }
 
-    // ── 강의 코스 시드 ────────────────────────────────────────────────
+    // ── 강의 코스 시드 (upsert) ──────────────────────────────────────
     private void seedLessonCourses() {
-        if (lessonCourseRepository.count() > 0) return;
-        lessonCourseRepository.saveAll(List.of(
-            lc("html",       "WEB1 - HTML",          "🌐", "web",    "beginner",     8, "웹 페이지의 뼈대를 만드는 마크업 언어"),
-            lc("css",        "WEB2 - CSS",            "🎨", "web",    "beginner",     6, "웹 페이지를 아름답게 꾸미는 스타일 언어"),
-            lc("javascript", "WEB3 - JavaScript",     "⚡", "web",    "beginner",     5, "웹 페이지에 동작을 추가하는 프로그래밍 언어"),
-            lc("typescript", "TypeScript",            "💙", "web",    "intermediate", 5, "타입 안전성을 갖춘 JavaScript 상위 집합"),
-            lc("java",       "Java 기초",             "☕", "java",   "beginner",     5, "객체지향 프로그래밍의 대표 언어"),
-            lc("kotlin",     "Kotlin",                "🟣", "java",   "intermediate", 4, "Android 공식 개발 언어"),
-            lc("c",          "C언어 기초",            "💻", "c",      "beginner",     5, "프로그래밍의 기본을 다지는 시스템 언어"),
-            lc("cpp",        "C++ 기초",              "⚙️", "c",      "intermediate", 4, "고성능 애플리케이션 개발 언어"),
-            lc("swift",      "Swift",                 "🦅", "mobile", "intermediate", 4, "iOS/macOS 앱 개발 언어"),
-            lc("python",     "Python",                "🐍", "etc",    "beginner",     5, "데이터 과학, AI, 웹 개발에 사용되는 언어")
-        ));
+        upsertLc("html",       "WEB1 - HTML",          "🌐", "web",    "beginner",     9, "웹 페이지의 뼈대를 만드는 마크업 언어");
+        upsertLc("css",        "WEB2 - CSS",            "🎨", "web",    "beginner",     6, "웹 페이지를 아름답게 꾸미는 스타일 언어");
+        upsertLc("javascript", "WEB3 - JavaScript",     "⚡", "web",    "beginner",     6, "웹 페이지에 동작을 추가하는 프로그래밍 언어");
+        upsertLc("typescript", "TypeScript",            "💙", "web",    "intermediate", 5, "타입 안전성을 갖춘 JavaScript 상위 집합");
+        upsertLc("java",       "Java 기초",             "☕", "java",   "beginner",     5, "객체지향 프로그래밍의 대표 언어");
+        upsertLc("kotlin",     "Kotlin",                "🟣", "java",   "intermediate", 4, "Android 공식 개발 언어");
+        upsertLc("c",          "C언어 기초",            "💻", "c",      "beginner",     5, "프로그래밍의 기본을 다지는 시스템 언어");
+        upsertLc("cpp",        "C++ 기초",              "⚙️", "c",      "intermediate", 4, "고성능 애플리케이션 개발 언어");
+        upsertLc("swift",      "Swift",                 "🦅", "mobile", "intermediate", 4, "iOS/macOS 앱 개발 언어");
+        upsertLc("python",     "Python",                "🐍", "etc",    "beginner",     5, "데이터 과학, AI, 웹 개발에 사용되는 언어");
     }
 
-    private LessonCourse lc(String lang, String title, String icon,
-                             String category, String level, int lessonCount, String desc) {
-        LessonCourse c = new LessonCourse();
+    private void upsertLc(String lang, String title, String icon,
+                           String category, String level, int lessonCount, String desc) {
+        LessonCourse c = lessonCourseRepository.findByLang(lang).orElse(new LessonCourse());
         c.setLang(lang);
         c.setTitle(title);
         c.setIcon(icon);
@@ -193,7 +190,7 @@ public class DataInitializer implements CommandLineRunner {
         c.setLevel(level);
         c.setLessonCount(lessonCount);
         c.setDescription(desc);
-        return c;
+        lessonCourseRepository.save(c);
     }
 
     // ── 챌린지 시드 ──────────────────────────────────────────────────

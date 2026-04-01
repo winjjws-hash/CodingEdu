@@ -2,12 +2,14 @@ package com.codingedu.controller;
 
 import com.codingedu.entity.User;
 import com.codingedu.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,5 +61,66 @@ public class AuthController {
 
         userService.register(user);
         return "redirect:/login?registered=true";
+    }
+
+    // 비밀번호 찾기 - 1단계: 본인 확인 폼
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage() {
+        return "forgot-password";
+    }
+
+    // 비밀번호 찾기 - 1단계: 아이디 + 이메일 검증
+    @PostMapping("/forgot-password/verify")
+    public String forgotPasswordVerify(@RequestParam(name = "username") String username,
+                                       @RequestParam(name = "email") String email,
+                                       HttpSession session,
+                                       Model model) {
+        if (!userService.verifyUsernameAndEmail(username, email)) {
+            model.addAttribute("verifyError", "아이디 또는 이메일이 일치하지 않습니다.");
+            return "forgot-password";
+        }
+        // 세션에 인증된 계정 정보 저장 (2단계에서 사용)
+        session.setAttribute("resetUsername", username);
+        session.setAttribute("resetEmail", email);
+        return "redirect:/forgot-password/reset";
+    }
+
+    // 비밀번호 찾기 - 2단계: 새 비밀번호 입력 폼
+    @GetMapping("/forgot-password/reset")
+    public String resetPasswordPage(HttpSession session, Model model) {
+        if (session.getAttribute("resetUsername") == null) {
+            return "redirect:/forgot-password";
+        }
+        model.addAttribute("resetStep", true);
+        return "forgot-password";
+    }
+
+    // 비밀번호 찾기 - 2단계: 새 비밀번호 저장
+    @PostMapping("/forgot-password/reset")
+    public String resetPasswordProcess(@RequestParam(name = "newPassword") String newPassword,
+                                       @RequestParam(name = "confirmPassword") String confirmPassword,
+                                       HttpSession session,
+                                       Model model) {
+        String username = (String) session.getAttribute("resetUsername");
+        String email = (String) session.getAttribute("resetEmail");
+
+        if (username == null || email == null) {
+            return "redirect:/forgot-password";
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("resetStep", true);
+            model.addAttribute("resetError", "비밀번호가 일치하지 않습니다.");
+            return "forgot-password";
+        }
+        if (newPassword.length() < 8) {
+            model.addAttribute("resetStep", true);
+            model.addAttribute("resetError", "비밀번호는 8자 이상이어야 합니다.");
+            return "forgot-password";
+        }
+
+        userService.resetPassword(username, email, newPassword);
+        session.removeAttribute("resetUsername");
+        session.removeAttribute("resetEmail");
+        return "redirect:/login?passwordReset=true";
     }
 }
